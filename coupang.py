@@ -20,33 +20,36 @@ driver.get(url)
 html = driver.page_source
 soup = BeautifulSoup(html, "html.parser")
 
-items = soup.select(".search-product-link.search-product-link-common")
-print(len(items))
-real_rank = 1
+items = soup.select("[class=search-product]")
+rank = 1
 
 # 검색 순위 1위부터 10위까지만 나오게하고 광고 제품은 제외
 # 1. 광고 제품인지 아닌지를 구분
 # 2. 출력 결과에서 1위부터 10까지만을 출력하도록 조건을 만든다
 # 순위?? html 코드에서 추출도 가능하겠지만, 변수 또는 enumerate 사용할 수 있다고 배웠다
-for rank, i in enumerate(items, 1):
+for i in items:
     ad = i.select_one(".ad-badge-text")
+    
     if not ad:
         product_name = i.select_one(".name").text # 상품명 추출
-        # 링크 추출
-        link = f"https://www.coupang.com{i.get('href')}"
+        product_price = i.select_one(".price-value").text # 가격 추출        
+        link = f"https://www.coupang.com{i.a['href']}" # 링크 추출
+        img = f"https:{i.img['src']}".replace("230x230ex", "600x600ex")
         if i.select_one(".badge.rocket"):
             roket = "로켓배송"  # 로켓배송 여부 확인
         else:
             roket = "일반배송"  # 일반배송 여부 확인
         
         # 결과 출력
-        print(f"순위 : {real_rank}위")
+        print(f"순위 : {rank}위")
         print(f"제품명 : {product_name}")
+        print(f"가격 : {product_price}원")
         print(f"링크 : {link}")
+        print(f"이미지 URL : {img}")
         print(f"배송 유형 : {roket}")
-        print('---------------------------------------------------')        
-        if real_rank >= 10:
+        print('---------------------------------------------------')
+        if rank >= 10:
             break
-        real_rank += 1 # 순위 증가
+        rank += 1 # 순위 증가
         
 driver.quit()
